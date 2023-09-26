@@ -12,8 +12,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const status = exception.getStatus();
-    const message = exception.message
-      ? exception.message
+    const message = exception.getResponse()['message']
+      ? exception.getResponse()['message']
       : 'something went wrong';
 
     response.status(status).json({
