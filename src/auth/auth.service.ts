@@ -39,7 +39,9 @@ export class AuthService {
       });
       return {
         success: true,
-        data: token,
+        data: {
+          access_token: token,
+        },
       };
     } catch (error) {
       console.log(error);
@@ -50,20 +52,34 @@ export class AuthService {
   async register(createAuthDto: CreateAuthDto) {
     try {
       const email = createAuthDto.email;
+
       const password = await hashPassword(createAuthDto.password);
+
       const checkUser = await this.authRepository.findOne({ where: { email } });
+
       if (checkUser) {
         throw new ConflictException('User with this email already exits');
       }
+
       const user = this.authRepository.create({
         email,
         password,
       });
+
       const savedUser = await this.authRepository.save(user);
+
       delete savedUser.password;
+
+      const token = this.jwtService.sign({
+        email: savedUser.email,
+        sub: savedUser.email,
+      });
+
       return {
         success: true,
-        data: savedUser,
+        data: {
+          access_token: token,
+        },
       };
     } catch (error) {
       throw error;
